@@ -4,10 +4,11 @@ react-separate-template
 React separate templates - Proof of concept
 
 First problem of react is HTML inside our JS files and there is no way to make them separate.
-This is my solution.
+
+## This is my solution.
 
 So I want to take out HTML from this class to separate file
-```jsx
+```javascript
 var MenuExample = React.createClass({
     getInitialState: function() {
         return {focused: 0};
@@ -61,7 +62,7 @@ to some function like this
 </div>
 ```
 But where should be that `list` function? What if it will be right after our `return`, where was this template?
-```jsx
+```javascript
 var MenuExample = React.createClass({
 
     //...
@@ -87,7 +88,7 @@ var MenuExample = React.createClass({
 ```
 But wait, not that again, HTML in code, maybe we can take out it, but it should be in same template file. Maybe we will
 make some annotation which will be replaced with HTML (with some unique id) from our template?
-```jsx
+```javascript
 var MenuExample = React.createClass({
 
     //...
@@ -126,13 +127,13 @@ Lets say that all tags with attribute `tpl` will be detached from template and c
 `@tpl` annotations. So basically they can be anywhere in template.
 
 Alright, looks good! Last thing to do is to write script to join code with template.
-I already done it [conv.js](conv.js). It will take file [js/menu.js] and join with (js/menu.html) to [(js/menu.js)]
-just run `node conv.js`
+I already done it [conv.js](conv.js). It will take file [js/menu.js](js/menu.js) and join with [js/menu.html](js/menu.html)
+to [js/menu.jsx](js/menu.jsx) just run `node conv.js`
 
 # TODO
 
 My script is not perfect, all attributes like `data-id={id}` it will convert to `data-id="{id}"` but for JSX it's different
 things.
 
-Also it will be perfect if I will have ability to write like this `class="item {style}"` and t will be converted to
+Also it will be perfect if I will have ability to write like this `class="item {style}"` and it will be converted to
 `className={"item " + style}`
