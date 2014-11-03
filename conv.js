@@ -7,8 +7,8 @@ var c = new Crawler();
 
 var js = fs.readFileSync('js/menu.js').toString(),
     html = fs.readFileSync('js/menu.html').toString(),
-    jsxComments = /\/\*+\s*@tpl\s+([\w\-]+)\s*\*\//g,
-    renderComments = /<!--\s*@render\s+([\w\-]+)\s*-->/g;
+    tplAnnotations = /\/\*+\s*@tpl\s+([\w\-]+)\s*\*\//g,
+    renderAnnotations = /<!--\s*@render\s+([\w\-]+)\s*-->/g;
 
 c.queue({
     html: html,
@@ -35,14 +35,14 @@ c.queue({
                 body = prop.value.body,
                 value = js.slice(body.start, body.end);
 
-            value = value.replace(jsxComments, function (x, name) {
+            value = value.replace(tplAnnotations, function (x, name) {
                 return format('(%s)', templates[name].outerHTML);
             });
 
             props[name] = value;
         });
 
-        var template = body.html().replace(renderComments, function (x, name) {
+        var template = body.html().replace(renderAnnotations, function (x, name) {
             return props[name];
         });
 
