@@ -5,9 +5,9 @@ var fs = require('fs'),
 
 var c = new Crawler();
 
-var js = fs.readFileSync('js/menu.src.js').toString(),
+var js = fs.readFileSync('js/menu.js').toString(),
     html = fs.readFileSync('js/menu.html').toString(),
-    jsxComments = /\/\*+\s*@jsx\s+([\w\-]+)\s*\*\//g,
+    jsxComments = /\/\*+\s*@tpl\s+([\w\-]+)\s*\*\//g,
     renderComments = /<!--\s*@render\s+([\w\-]+)\s*-->/g;
 
 c.queue({
@@ -21,12 +21,10 @@ c.queue({
             item.removeAttribute('class');
         });
 
-        $('[jsx]').detach().each(function (i, item) {
-            templates[item.getAttribute('jsx')] = item;
-            item.removeAttribute('jsx');
+        $('[tpl]').detach().each(function (i, item) {
+            templates[item.getAttribute('tpl')] = item;
+            item.removeAttribute('tpl');
         });
-
-        //var res = search('prop[key.name=render].value.body > return > obj > prop', js);
 
         var _return = search('prop[key.name=render].value.body > return', js)[0],
             _props = search('prop[key.name=render].value.body > return > obj > prop', js),
@@ -57,26 +55,4 @@ c.queue({
 
 function insert(str, start, end, newStr) {
     return str.slice(0, start) + newStr + str.slice(end);
-}
-
-function fixJsxAttributes(str) {
-    return str.replace(/="#\{/g, '={').replace(/}#"/g, '"');
-}
-
-function strToJsx(str) {
-    var parts = str.split(/\s+/),
-        jsx = [];
-
-    parts.forEach(function (item, i) {
-        if (item.charAt(0) === '{') {
-            jsx.push(item.replace(/^\{/, '').replace(/}$/, ''));
-        }
-        else {
-            jsx.push(format("'%s'", item));
-        }
-    });
-
-    jsx = jsx.join(" + ' ' + ").replace(/' \+ '/g, '');
-
-    return format('{%s}', jsx);
 }

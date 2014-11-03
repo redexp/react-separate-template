@@ -10,9 +10,8 @@ var MenuExample = React.createClass({
     render: function() {
         var self = this;
 
-        return (<div>
-    <ul>
-        {
+        return {
+            list: function () {
                 this.props.items.map(function(m, index) {
                     var style = '';
 
@@ -20,13 +19,9 @@ var MenuExample = React.createClass({
                         style = 'focused';
                     }
 
-                    return (<li className="item">{m}</li>);
+                    return /* @tpl item */;
                 })
             }
-        
-    </ul>
-
-    <p>Selected: {this.props.items[this.state.focused]}</p>
-</div>);
+        };
     }
 });
