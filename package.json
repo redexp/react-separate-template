@@ -1,0 +1,27 @@
+{
+  "name": "react-separate-template",
+  "version": "0.0.1",
+  "description": "React separate templates - Proof of concept",
+  "main": "conv.js",
+  "dependencies": {
+    "crawler": "~0.3.1",
+    "grasp": "~0.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/redexp/react-separate-template.git"
+  },
+  "keywords": [
+    "react",
+    "template"
+  ],
+  "author": "Sergii Kliuchnyk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/redexp/react-separate-template/issues"
+  }
+}
