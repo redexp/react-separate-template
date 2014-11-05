@@ -20,7 +20,7 @@ var MenuExample = React.createClass({
                         style = 'focused';
                     }
 
-                    return (<li className="item">{m}</li>);
+                    return (<li title="Item" className={'item ' + style}>{m}</li>);
                 })
             }
         

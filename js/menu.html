@@ -1,7 +1,7 @@
 <div>
     <ul>
         <!-- @render list -->
-        <li tpl="item" class="item">{m}</li>
+        <li tpl="item" class="item {style}" title="Item">{m}</li>
     </ul>
 
     <p>Selected: {this.props.items[this.state.focused]}</p>

@@ -130,10 +130,14 @@ Alright, looks good! Last thing to do is to write script to join code with templ
 I already done it [conv.js](conv.js). It will take file [js/menu.js](js/menu.js) and join with [js/menu.html](js/menu.html)
 to [js/menu.jsx](js/menu.jsx) just run `node conv.js`
 
+## Additional features
+
+ * All `class` attributes will renamed to `className`
+ * I added syntax like this `class="item {style}"` and it will be converted to `className={"item " + style}`. Helpful for
+   styling html without running js code
+
 # TODO
 
-My script is not perfect, all attributes like `data-id={id}` it will convert to `data-id="{id}"` but for JSX it's different
-things.
-
-Also it will be perfect if I will have ability to write like this `class="item {style}"` and it will be converted to
-`className={"item " + style}`
+What if will be needed curly brackets in attribute as string? For example for knockout `data-bind="css: {selected: isSelected}"`.
+Is it good enough to put value to variable and output it like this `var bindings = "css: {selected: isSelected}";`, `data-bind="{bindings}"`?
+I think it will keep html more clear.
