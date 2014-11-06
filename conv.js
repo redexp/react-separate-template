@@ -8,7 +8,10 @@ var c = new Crawler();
 var js = fs.readFileSync('js/menu.js').toString(),
     html = fs.readFileSync('js/menu.html').toString(),
     tplAnnotations = /\/\*+\s*@tpl\s+([\w\-]+)\s*\*\//g,
-    renderAnnotations = /<!--\s*@render\s+([\w\-]+)\s*-->/g;
+    renderAnnotations = /<!--\s*@render\s+([\w\-]+)\s*-->/g,
+    renderReturnSelector =
+        'call[callee.object.name="React"][callee.property.name="createClass"]'+
+        ' > obj > prop[key.name="render"] > func-exp > block > return';
 
 c.queue({
     html: html,
@@ -29,8 +32,8 @@ c.queue({
             templates[name] = clearAttrQuotes(item.outerHTML);
         });
 
-        var _return = search('prop[key.name=render].value.body > return', js)[0],
-            _props = search('prop[key.name=render].value.body > return > obj > prop', js),
+        var _return = search(renderReturnSelector, js)[0],
+            _props = search(renderReturnSelector + ' > obj > prop', js),
             props = {};
 
         _props.forEach(function (prop) {
