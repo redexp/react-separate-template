@@ -5,8 +5,12 @@ var fs = require('fs'),
 
 var c = new Crawler();
 
-var js = fs.readFileSync('js/menu.js').toString(),
-    html = fs.readFileSync('js/menu.html').toString(),
+var fileJs = process.argv[2],
+    fileHtml = fileJs.replace(/\.js$/, '.html'),
+    fileJsx = fileJs.replace(/\.js$/, '.jsx');
+
+var js = fs.readFileSync(fileJs).toString(),
+    html = fs.readFileSync(fileHtml).toString(),
     tplAnnotations = /\/\*+\s*@tpl\s+([\w\-]+)\s*\*\//g,
     renderAnnotations = /<!--\s*@render\s+([\w\-]+)\s*-->/g,
     renderReturnSelector =
@@ -54,7 +58,7 @@ c.queue({
 
         js = insert(js, _return.start, _return.end, format('return (%s);', template));
 
-        fs.writeFileSync('js/menu.jsx', js);
+        fs.writeFileSync(fileJsx, js);
         process.exit();
     }
 });

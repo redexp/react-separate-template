@@ -127,8 +127,8 @@ Lets say that all tags with attribute `tpl` will be detached from template and c
 `@tpl` annotations. So basically they can be anywhere in template.
 
 Alright, looks good! Last thing to do is to write script to join code with template.
-I already done it [conv.js](conv.js). It will take file [js/menu.js](js/menu.js) and join with [js/menu.html](js/menu.html)
-to [js/menu.jsx](js/menu.jsx) just run `node conv.js`
+I already done it [conv.js](conv.js), just run `node conv.js js/menu.js`. It will take file [js/menu.js](js/menu.js) and
+join with [js/menu.html](js/menu.html) and save to [js/menu.jsx](js/menu.jsx)
 
 ## Additional features
 
@@ -136,8 +136,16 @@ to [js/menu.jsx](js/menu.jsx) just run `node conv.js`
  * I added syntax like this `class="item {style}"` and it will be converted to `className={"item " + style}`. Helpful for
    styling html without running js code
 
-# TODO
+## Notice
 
-What if will be needed curly brackets in attribute as string? For example for knockout `data-bind="css: {selected: isSelected}"`.
-Is it good enough to put value to variable and output it like this `var bindings = "css: {selected: isSelected}";`, `data-bind="{bindings}"`?
-I think it will keep html more clear.
+All attributes with curly brackets will be converted to react jsx version. If you will write something like this
+`data-bind="attr: {active: isActive}"` it will be converted to `data-bind={'attr: ' + active: isActive}`, so be careful.
+
+## TODO
+
+ * make npm module
+ * make gulp module
+
+## Contribute!
+
+I will be glad if you have any suggestions, just create an issue.
