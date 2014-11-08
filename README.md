@@ -146,7 +146,7 @@ convert(jsString, htmlString, function (err, jsxString) {
 ## Additional features
 
  * All `class` attributes will renamed to `className`
- * All `jas-spread="someVar"` attributes will be converted to [Spread Attribute](http://facebook.github.io/react/docs/jsx-spread.html#spread-attributes) `{...someVar}`
+ * All `jsx-spread="someVar"` attribute will be converted to [Spread Attribute](http://facebook.github.io/react/docs/jsx-spread.html#spread-attributes) `{...someVar}`
  * I added syntax like this `class="item {style}"` and it will be converted to `className={"item " + style}`. Helpful for
    styling html without running js code
 
