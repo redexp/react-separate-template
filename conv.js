@@ -1,67 +1,65 @@
-var fs = require('fs'),
-    Crawler = require('crawler'),
+var jsdom = require('jsdom'),
+    fs = require('fs'),
+    jquery = fs.readFileSync('./node_modules/jquery/dist/jquery.min.js'),
     search = require('grasp').search('squery'),
     format = require('util').format;
 
-var c = new Crawler();
+module.exports = convert;
 
-var fileJs = process.argv[2],
-    fileHtml = fileJs.replace(/\.js$/, '.html'),
-    fileJsx = fileJs.replace(/\.js$/, '.jsx');
-
-var js = fs.readFileSync(fileJs).toString(),
-    html = fs.readFileSync(fileHtml).toString(),
-    tplAnnotations = /\/\*+\s*@tpl\s+([\w\-]+)\s*\*\//g,
+var tplAnnotations = /\/\*+\s*@tpl\s+([\w\-]+)\s*\*\//g,
     renderAnnotations = /<!--\s*@render\s+([\w\-]+)\s*-->/g,
     renderReturnSelector =
         'call[callee.object.name="React"][callee.property.name="createClass"]'+
         ' > obj > prop[key.name="render"] > func-exp > block > return';
 
-c.queue({
-    html: html,
-    callback: function (err, res, $) {
-        var templates = {},
-            body = $('body');
+function convert(js, html, callback) {
+    jsdom.env({
+        html: html,
+        src: [jquery],
+        done: function (err, window) {
+            var $ = window.jQuery,
+                templates = {},
+                body = $('body');
 
-        prepareAttr(body.get(0));
+            prepareAttr(body.get(0));
 
-        $('[class]').each(function (i, item) {
-            item.setAttribute('className', item.getAttribute('class'));
-            item.removeAttribute('class');
-        });
-
-        $('[tpl]').detach().each(function (i, item) {
-            var name = item.getAttribute('tpl');
-            item.removeAttribute('tpl');
-            templates[name] = clearAttrQuotes(item.outerHTML);
-        });
-
-        var _return = search(renderReturnSelector, js)[0],
-            _props = search(renderReturnSelector + ' > obj > prop', js),
-            props = {};
-
-        _props.forEach(function (prop) {
-            var name = prop.key.name,
-                body = prop.value.body,
-                value = js.slice(body.start, body.end);
-
-            value = value.replace(tplAnnotations, function (x, name) {
-                return format('(%s)', templates[name]);
+            $('[class]').each(function (i, item) {
+                item.setAttribute('className', item.getAttribute('class'));
+                item.removeAttribute('class');
             });
 
-            props[name] = value;
-        });
+            $('[tpl]').detach().each(function (i, item) {
+                var name = item.getAttribute('tpl');
+                item.removeAttribute('tpl');
+                templates[name] = clearAttrQuotes(item.outerHTML);
+            });
 
-        var template = clearAttrQuotes(body.html()).replace(renderAnnotations, function (x, name) {
-            return props[name];
-        });
+            var _return = search(renderReturnSelector, js)[0],
+                _props = search(renderReturnSelector + ' > obj > prop', js),
+                props = {};
 
-        js = insert(js, _return.start, _return.end, format('return (%s);', template));
+            _props.forEach(function (prop) {
+                var name = prop.key.name,
+                    body = prop.value.body,
+                    value = js.slice(body.start, body.end);
 
-        fs.writeFileSync(fileJsx, js);
-        process.exit();
-    }
-});
+                value = value.replace(tplAnnotations, function (x, name) {
+                    return format('(%s)', templates[name]);
+                });
+
+                props[name] = value;
+            });
+
+            var template = clearAttrQuotes(body.html()).replace(renderAnnotations, function (x, name) {
+                return props[name];
+            });
+
+            js = insert(js, _return.start, _return.end, format('return (%s);', template));
+
+            callback(js);
+        }
+    });
+}
 
 function insert(str, start, end, newStr) {
     return str.slice(0, start) + newStr + str.slice(end);

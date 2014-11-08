@@ -3,16 +3,11 @@ var MenuExample = React.createClass({
         return {focused: 0};
     },
 
-    clicked: function(index) {
-        this.setState({focused: index});
-    },
-
     render: function() {
         var self = this;
 
-        return (<div>
-    <ul>
-        {
+        return {
+            list: function () {
                 this.props.items.map(function(m, index) {
                     var style = '';
 
@@ -20,13 +15,12 @@ var MenuExample = React.createClass({
                         style = 'focused';
                     }
 
-                    return (<li title="Item" className={'item ' + style}>{m}</li>);
+                    return /* @tpl item */;
                 })
+            },
+            foo: function () {
+                self.state
             }
-        
-    </ul>
-
-    <p>Selected: {this.props.items[this.state.focused]}</p>
-</div>);
+        };
     }
 });

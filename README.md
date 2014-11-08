@@ -127,8 +127,10 @@ Lets say that all tags with attribute `tpl` will be detached from template and c
 `@tpl` annotations. So basically they can be anywhere in template.
 
 Alright, looks good! Last thing to do is to write script to join code with template.
-I already done it [conv.js](conv.js), just run `node conv.js js/menu.js`. It will take file [js/menu.js](js/menu.js) and
-join with [js/menu.html](js/menu.html) and save to [js/menu.jsx](js/menu.jsx)
+I already done it [conv.js](conv.js), just run `node cli.js -j test/menu.js`. It will take file [test/menu.js](test/menu.js) and
+join with [test/menu.html](test/menu.html) and save to [test/menu.jsx](test/menu.jsx)
+
+To see all options run `node cli.js -h`
 
 ## Additional features
 

@@ -1,15 +1,21 @@
 {
   "name": "react-separate-template",
-  "version": "0.0.1",
-  "description": "React separate templates - Proof of concept",
+  "version": "0.3.0",
+  "description": "React separate template",
   "main": "conv.js",
   "dependencies": {
-    "crawler": "~0.3.1",
-    "grasp": "~0.2.1"
+    "grasp": "~0.2.1",
+    "commander": "~2.5.0",
+    "jsdom": "~1.2.0",
+    "jquery": "~2.1.1",
+    "react-tools": "~0.12.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "~2.0.1",
+    "chai": "~1.9.2"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/mocha -R spec ./test/conv.js"
   },
   "repository": {
     "type": "git",
@@ -17,7 +23,9 @@
   },
   "keywords": [
     "react",
-    "template"
+    "template",
+    "html",
+    "converter"
   ],
   "author": "Sergii Kliuchnyk",
   "license": "MIT",
