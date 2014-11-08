@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var fs = require('fs'),
     convert = require('./conv'),
     app = require('commander'),
