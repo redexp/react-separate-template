@@ -16,6 +16,9 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha -R spec ./test/conv.js"
   },
+  "bin": {
+    "react-st": "cli.js"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/redexp/react-separate-template.git"
