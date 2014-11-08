@@ -1,6 +1,5 @@
-var jsdom = require('jsdom'),
-    fs = require('fs'),
-    jquery = fs.readFileSync('./node_modules/jquery/dist/jquery.min.js'),
+var htmlParser = require('htmlparser2'),
+    domUtils = htmlParser.DomUtils,
     search = require('grasp').search('squery'),
     format = require('util').format;
 
@@ -13,52 +12,84 @@ var tplAnnotations = /\/\*+\s*@tpl\s+([\w\-]+)\s*\*\//g,
         ' > obj > prop[key.name="render"] > func-exp > block > return';
 
 function convert(js, html, callback) {
-    jsdom.env({
-        html: html,
-        src: [jquery],
-        done: function (err, window) {
-            var $ = window.jQuery,
-                templates = {},
-                body = $('body');
+    parseHtml(html, function (err, body) {
+        if (err) {
+            callback(err);
+            return;
+        }
 
-            prepareAttr(body.get(0));
+        var templates = {};
 
-            $('[class]').each(function (i, item) {
-                item.setAttribute('className', item.getAttribute('class'));
-                item.removeAttribute('class');
+        prepareAttr(body);
+
+        domUtils.findAll(function (node) {
+            return domUtils.hasAttrib(node, 'tpl');
+        }, body.children).forEach(function (node) {
+            var name = node.attribs['tpl'];
+            delete node.attribs['tpl'];
+
+            templates[name] = clearAttrQuotes(domUtils.getOuterHTML(node));
+
+            domUtils.removeElement(node);
+        });
+
+        var _return = search(renderReturnSelector, js)[0],
+            _props = search(renderReturnSelector + ' > obj > prop', js),
+            props = {};
+
+        _props.forEach(function (prop) {
+            var name = prop.key.name,
+                body = prop.value.body,
+                value = js.slice(body.start, body.end);
+
+            value = value.replace(tplAnnotations, function (x, name) {
+                return format('(%s)', templates[name]);
             });
 
-            $('[tpl]').detach().each(function (i, item) {
-                var name = item.getAttribute('tpl');
-                item.removeAttribute('tpl');
-                templates[name] = clearAttrQuotes(item.outerHTML);
-            });
+            props[name] = value;
+        });
 
-            var _return = search(renderReturnSelector, js)[0],
-                _props = search(renderReturnSelector + ' > obj > prop', js),
-                props = {};
-
-            _props.forEach(function (prop) {
-                var name = prop.key.name,
-                    body = prop.value.body,
-                    value = js.slice(body.start, body.end);
-
-                value = value.replace(tplAnnotations, function (x, name) {
-                    return format('(%s)', templates[name]);
-                });
-
-                props[name] = value;
-            });
-
-            var template = clearAttrQuotes(body.html()).replace(renderAnnotations, function (x, name) {
+        var template = clearAttrQuotes(domUtils.getOuterHTML(body))
+            .replace(renderAnnotations, function (x, name) {
                 return props[name];
             });
 
-            js = insert(js, _return.start, _return.end, format('return (%s);', template));
+        js = insert(js, _return.start, _return.end, format('return (%s);', template));
 
-            callback(js);
-        }
+        callback(js);
     });
+}
+
+function parseHtml(html, callback) {
+    var handler = new htmlParser.DomHandler(function (err, dom) {
+        if (err) {
+            callback(err);
+            return;
+        }
+
+        var body;
+        if (dom.type === 'tag') {
+            body = dom;
+        }
+        else {
+            for (var i = 0; i < dom.length; i++) {
+                if (dom[i].type === 'tag') {
+                    body = dom[i];
+                    break;
+                }
+            }
+        }
+
+        callback(err, body);
+    });
+
+    var parser = new htmlParser.Parser(handler, {
+        lowerCaseTags: false,
+        lowerCaseAttributeNames: false
+    });
+
+    parser.write(html);
+    parser.done();
 }
 
 function insert(str, start, end, newStr) {
@@ -98,6 +129,32 @@ function bracketsParser(str) {
     return list;
 }
 
+function prepareAttr(node) {
+    var parts, i;
+
+    var list = node.attribs || {};
+    for (var name in list) {
+        if (!list.hasOwnProperty(name)) continue;
+
+        parts = bracketsParser(list[name]);
+
+        if (parts.length > 0) {
+            list[name] = '~~~' + htmlAttrToJsx(list[name], parts) + '~~~';
+        }
+    }
+
+    if (list.hasOwnProperty('class')) {
+        list['className'] = list['class'];
+        delete list['class'];
+    }
+
+    if (node.children) {
+        for (i = 0; i < node.children.length; i++) {
+            prepareAttr(node.children[i]);
+        }
+    }
+}
+
 function htmlAttrToJsx(attr, list) {
     var parts = [],
         start = 0;
@@ -115,28 +172,6 @@ function htmlAttrToJsx(attr, list) {
     }
 
     return "{" + parts.join(' + ') + "}";
-}
-
-function prepareAttr(node) {
-    var list, attr, parts, i;
-
-    if (node.hasAttributes()) {
-        list = node.attributes;
-        for (i = 0; i < list.length; i++) {
-            attr = list.item(i);
-            parts = bracketsParser(attr.value);
-
-            if (parts.length > 0) {
-                attr.value = '~~~' + htmlAttrToJsx(attr.value, parts) + '~~~';
-            }
-        }
-    }
-
-    if (node.hasChildNodes()) {
-        for (i = 0; i < node.children.length; i++) {
-            prepareAttr(node.children[i]);
-        }
-    }
 }
 
 function clearAttrQuotes(html) {

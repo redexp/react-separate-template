@@ -1,4 +1,4 @@
-var MenuExample = React.createClass({
+var List = React.createClass({
     getInitialState: function() {
         return {focused: 0};
     },

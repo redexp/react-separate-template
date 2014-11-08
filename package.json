@@ -1,14 +1,13 @@
 {
   "name": "react-separate-template",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "React separate template",
   "main": "conv.js",
   "dependencies": {
     "grasp": "~0.2.1",
     "commander": "~2.5.0",
-    "jsdom": "~1.2.0",
-    "jquery": "~2.1.1",
-    "react-tools": "~0.12.0"
+    "react-tools": "~0.12.0",
+    "htmlparser2": "~3.8.2"
   },
   "devDependencies": {
     "mocha": "~2.0.1",

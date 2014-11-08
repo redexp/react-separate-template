@@ -1,4 +1,4 @@
-var MenuExample = React.createClass({
+var List = React.createClass({
     getInitialState: function() {
         return {focused: 0};
     },
@@ -6,9 +6,8 @@ var MenuExample = React.createClass({
     render: function() {
         var self = this;
 
-        return (<div>
-    <ul>
-        {
+        return (<ul>
+    {
                 this.props.items.map(function(m, index) {
                     var style = '';
 
@@ -16,11 +15,10 @@ var MenuExample = React.createClass({
                         style = 'focused';
                     }
 
-                    return (<li title="Item" className={'item ' + style}>{m}</li>);
+                    return (<Item title="Item" className={'item ' + style}>{m}</Item>);
                 })
             }
-        
-    </ul>
-</div>);
+    
+</ul>);
     }
 });
