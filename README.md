@@ -1,9 +1,15 @@
 React separate template
 =======================
 
+1. [Solution description](#solution-description)
+2. [Installation](#installation)
+3. [Usage from command line](#usage-from-command-line)
+4. [Usage from code](#usage-from-code)
+5. [Additional features](#additional-features)
+
 First problem of react is HTML inside our JS files and there is no way to make them separate.
 
-## This is my solution
+## Solution description
 
 So I want to take out HTML from this class to separate file
 ```javascript
@@ -126,20 +132,20 @@ Lets say that all tags with attribute `jsx-tpl` will be detached from template a
 
 ## Installation
 
-Download this repo and run `npm install` to get all dependencies
+`npm install react-st`
 
-## Convert from command line
+## Usage from command line
 
-Just run `node cli.js -j test/menu.js`. It will take file [test/menu.js](test/menu.js), join with [test/menu.html](test/menu.html)
+Just run `react-st -j test/menu.js`. It will take file [test/menu.js](test/menu.js), join with [test/menu.html](test/menu.html)
 and save to [test/menu.jsx](test/menu.jsx)
 
-To see all options run `node cli.js -h`
+To see all options run `react-st -h`
 
-## Convert from code
+## Usage from code
 
 Example
 ```javascript
-var convert = require('./conv');
+var convert = require('react-st');
 
 convert(jsString, htmlString, function (err, jsxString) {
   // check err
@@ -161,7 +167,6 @@ All attributes with curly brackets will be converted to react jsx version. If yo
 
 ## TODO
  
- * make npm module
  * make gulp module
 
 ## Contribute!
