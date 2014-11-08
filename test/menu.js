@@ -15,6 +15,8 @@ var List = React.createClass({
                         style = 'focused';
                     }
 
+                    var attr = {name: 'value'};
+
                     return /* @tpl item */;
                 })
             },

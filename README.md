@@ -146,6 +146,7 @@ convert(jsString, htmlString, function (err, jsxString) {
 ## Additional features
 
  * All `class` attributes will renamed to `className`
+ * All `jas-spread="someVar"` attributes will be converted to [Spread Attribute](http://facebook.github.io/react/docs/jsx-spread.html#spread-attributes) `{...someVar}`
  * I added syntax like this `class="item {style}"` and it will be converted to `className={"item " + style}`. Helpful for
    styling html without running js code
 
@@ -156,7 +157,6 @@ All attributes with curly brackets will be converted to react jsx version. If yo
 
 ## TODO
  
- * implement [Spread Attributes](http://facebook.github.io/react/docs/jsx-spread.html#spread-attributes).
  * make npm module
  * make gulp module
 

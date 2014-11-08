@@ -7,6 +7,7 @@ module.exports = convert;
 
 var tplAnnotations = /\/\*+\s*@tpl\s+([\w\-]+)\s*\*\//g,
     renderAnnotations = /<!--\s*@render\s+([\w\-]+)\s*-->/g,
+    spreadAttr = /jsx\-spread="([\$\w]+)"/g,
     renderReturnSelector =
         'call[callee.object.name="React"][callee.property.name="createClass"]'+
         ' > obj > prop[key.name="render"] > func-exp > block > return';
@@ -175,5 +176,8 @@ function htmlAttrToJsx(attr, list) {
 }
 
 function clearAttrQuotes(html) {
-    return html.replace(/="~~~\{/g, '={').replace(/}~~~"/g, '}');
+    return html
+        .replace(/="~~~\{/g, '={').replace(/}~~~"/g, '}')
+        .replace(spreadAttr, '{...$1}')
+    ;
 }

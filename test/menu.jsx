@@ -15,7 +15,9 @@ var List = React.createClass({
                         style = 'focused';
                     }
 
-                    return (<Item title="Item" className={'item ' + style}>{m}</Item>);
+                    var attr = {name: 'value'};
+
+                    return (<Item {...attr} title="Item" className={'item ' + style}>{m}</Item>);
                 })
             }
     
