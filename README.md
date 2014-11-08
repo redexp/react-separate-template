@@ -124,6 +124,10 @@ Lets call attribute with this unique id just like annotation
 Lets say that all tags with attribute `tpl` will be detached from template and can be used only in classes to replace
 `@tpl` annotations. So basically they can be anywhere in template.
 
+## Installation
+
+Download this repo and run `npm install` to get all dependencies
+
 ## Convert from command line
 
 Just run `node cli.js -j test/menu.js`. It will take file [test/menu.js](test/menu.js), join with [test/menu.html](test/menu.html)
