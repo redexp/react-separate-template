@@ -17,7 +17,7 @@ var List = React.createClass({
 
                     var attr = {name: 'value'};
 
-                    return /* @tpl item */;
+                    return /* @jsx-tpl item */;
                 })
             },
             foo: function () {

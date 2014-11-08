@@ -1,6 +1,6 @@
 {
   "name": "react-separate-template",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "React separate template",
   "main": "conv.js",
   "dependencies": {

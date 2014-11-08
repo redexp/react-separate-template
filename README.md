@@ -103,7 +103,7 @@ var MenuExample = React.createClass({
                         style = 'focused';
                     }
 
-                    return /* @tpl item */;
+                    return /* @jsx-tpl item */;
                 })
             }
         };
@@ -115,14 +115,14 @@ Lets call attribute with this unique id just like annotation
 <div>
     <ul>
         <!-- @render list -->
-        <li tpl="item" class={style}>{m}</li>
+        <li jsx-tpl="item" class={style}>{m}</li>
     </ul>
 
     <p>Selected: {this.props.items[this.state.focused]}</p>
 </div>
 ```
-Lets say that all tags with attribute `tpl` will be detached from template and can be used only in classes to replace
-`@tpl` annotations. So basically they can be anywhere in template.
+Lets say that all tags with attribute `jsx-tpl` will be detached from template and can be used only in classes to replace
+`@jsx-tpl` annotations. So basically they can be anywhere in template.
 
 ## Installation
 

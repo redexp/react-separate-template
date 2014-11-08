@@ -5,7 +5,8 @@ var htmlParser = require('htmlparser2'),
 
 module.exports = convert;
 
-var tplAnnotations = /\/\*+\s*@tpl\s+([\w\-]+)\s*\*\//g,
+var tplAnnotations = /\/\*+\s*@jsx\-tpl\s+([\w\-]+)\s*\*\//g,
+    tplAttr = 'jsx-tpl',
     renderAnnotations = /<!--\s*@render\s+([\w\-]+)\s*-->/g,
     spreadAttr = /jsx\-spread="([\$\w]+)"/g,
     renderReturnSelector =
@@ -24,10 +25,10 @@ function convert(js, html, callback) {
         prepareAttr(body);
 
         domUtils.findAll(function (node) {
-            return domUtils.hasAttrib(node, 'tpl');
+            return domUtils.hasAttrib(node, tplAttr);
         }, body.children).forEach(function (node) {
-            var name = node.attribs['tpl'];
-            delete node.attribs['tpl'];
+            var name = node.attribs[tplAttr];
+            delete node.attribs[tplAttr];
 
             templates[name] = clearAttrQuotes(domUtils.getOuterHTML(node));
 
