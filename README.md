@@ -144,7 +144,8 @@ All attributes with curly brackets will be converted to react jsx version. If yo
 `data-bind="attr: {active: isActive}"` it will be converted to `data-bind={'attr: ' + active: isActive}`, so be careful.
 
 ## TODO
-
+ 
+ * implement [Spread Attributes](http://facebook.github.io/react/docs/jsx-spread.html#spread-attributes).
  * make npm module
  * make gulp module
 
