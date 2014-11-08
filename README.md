@@ -1,11 +1,9 @@
-react-separate-template
+React separate template
 =======================
-
-React separate templates - Proof of concept
 
 First problem of react is HTML inside our JS files and there is no way to make them separate.
 
-## This is my solution.
+## This is my solution
 
 So I want to take out HTML from this class to separate file
 ```javascript
@@ -126,11 +124,24 @@ Lets call attribute with this unique id just like annotation
 Lets say that all tags with attribute `tpl` will be detached from template and can be used only in classes to replace
 `@tpl` annotations. So basically they can be anywhere in template.
 
-Alright, looks good! Last thing to do is to write script to join code with template.
-I already done it [conv.js](conv.js), just run `node cli.js -j test/menu.js`. It will take file [test/menu.js](test/menu.js) and
-join with [test/menu.html](test/menu.html) and save to [test/menu.jsx](test/menu.jsx)
+## Convert from command line
+
+Just run `node cli.js -j test/menu.js`. It will take file [test/menu.js](test/menu.js), join with [test/menu.html](test/menu.html)
+and save to [test/menu.jsx](test/menu.jsx)
 
 To see all options run `node cli.js -h`
+
+## Convert from code
+
+Example
+```javascript
+var convert = require('./conv');
+
+convert(jsString, htmlString, function (err, jsxString) {
+  // check err
+  // save jsxString to file or whatever you want
+});
+```
 
 ## Additional features
 
@@ -138,7 +149,7 @@ To see all options run `node cli.js -h`
  * I added syntax like this `class="item {style}"` and it will be converted to `className={"item " + style}`. Helpful for
    styling html without running js code
 
-## Notice
+### Notice
 
 All attributes with curly brackets will be converted to react jsx version. If you will write something like this
 `data-bind="attr: {active: isActive}"` it will be converted to `data-bind={'attr: ' + active: isActive}`, so be careful.
