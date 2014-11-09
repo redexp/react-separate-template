@@ -6,6 +6,7 @@ React separate template
 3. [Usage from command line](#usage-from-command-line)
 4. [Usage from code](#usage-from-code)
 5. [Additional features](#additional-features)
+6. [Gulp plugin](#gulp-plugin)
 
 First problem of react is HTML inside our JS files and there is no way to make them separate.
 
@@ -165,9 +166,9 @@ convert(jsString, htmlString, function (err, jsxString) {
 All attributes with curly brackets will be converted to react jsx version. If you will write something like this
 `data-bind="attr: {active: isActive}"` it will be converted to `data-bind={'attr: ' + active: isActive}`, so be careful.
 
-## TODO
+## Gulp plugin
  
- * make gulp module
+See https://github.com/redexp/gulp-react-st
 
 ## Contribute!
 
