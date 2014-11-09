@@ -73,7 +73,7 @@ function convert(js, html, callback) {
             return callback(new Error('More then one React.createClass return: option'));
         }
         else {
-            js = insert(js, _return.start, _return.end, format('return (%s);', template));
+            js = insert(js, _return[0].start, _return[0].end, format('return (%s);', template));
         }
 
         return callback(err, js);
