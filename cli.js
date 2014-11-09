@@ -19,7 +19,11 @@ var fileJs = app.js,
     js = fs.readFileSync(fileJs).toString(),
     html = fs.readFileSync(fileHtml).toString();
 
-convert(js, html, function (jsx) {
+convert(js, html, function (err, jsx) {
+    if (err) {
+        throw err;
+    }
+
     if (app.type === 'js') {
         jsx = react.transform(jsx);
     }
