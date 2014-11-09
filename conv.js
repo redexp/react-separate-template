@@ -16,8 +16,7 @@ var tplAnnotations = /\/\*+\s*@jsx\-tpl\s+([\w\-]+)\s*\*\//g,
 function convert(js, html, callback) {
     parseHtml(html, function (err, body) {
         if (err) {
-            callback(err);
-            return;
+            return callback(err);
         }
 
         var templates = {};
@@ -35,7 +34,7 @@ function convert(js, html, callback) {
             domUtils.removeElement(node);
         });
 
-        var _return = search(renderReturnSelector, js)[0],
+        var _return = search(renderReturnSelector, js),
             _props = search(renderReturnSelector + ' > obj > prop', js),
             props = {};
 
@@ -51,14 +50,33 @@ function convert(js, html, callback) {
             props[name] = value;
         });
 
-        var template = clearAttrQuotes(domUtils.getOuterHTML(body))
-            .replace(renderAnnotations, function (x, name) {
-                return props[name];
-            });
+        var template = clearAttrQuotes(domUtils.getOuterHTML(body));
 
-        js = insert(js, _return.start, _return.end, format('return (%s);', template));
+        try {
+            template = template
+                .replace(renderAnnotations, function (x, name) {
+                    if (!props.hasOwnProperty(name)) {
+                        throw new Error('Template "' + name + '" not exists');
+                    }
+                    return props[name];
+                })
+            ;
+        }
+        catch (e) {
+            return callback(e);
+        }
 
-        callback(js);
+        if (_return.length === 0) {
+            return callback(new Error('React.createClass return: option not found'));
+        }
+        else if (_return.length > 2) {
+            return callback(new Error('More then one React.createClass return: option'));
+        }
+        else {
+            js = insert(js, _return.start, _return.end, format('return (%s);', template));
+        }
+
+        return callback(err, js);
     });
 }
 

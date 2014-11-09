@@ -9,7 +9,7 @@ function file(path) {
 describe('convert function', function () {
 
     it ('should convert js + html to jsx', function (done) {
-        conv(file('menu.js'), file('menu.html'), function (jsx) {
+        conv(file('menu.js'), file('menu.html'), function (err, jsx) {
             expect(jsx).to.equal(file('menu.jsx'));
             done();
         });
