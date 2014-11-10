@@ -110,14 +110,15 @@ var MenuExample = React.createClass({
                         style = 'focused';
                     }
 
-                    return /* @jsx-tpl item */;
+                    return "@jsx-tpl item";
                 })
             }
         };
     }
 });
 ```
-Lets call attribute with this unique id just like annotation
+Annotation not in comment because it is a value, not just some meta information.
+Lets call attribute with this unique id just like annotation.
 ```html
 <div>
     <ul>

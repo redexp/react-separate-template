@@ -5,9 +5,10 @@ var htmlParser = require('htmlparser2'),
 
 module.exports = convert;
 
-var tplAnnotations = /\/\*+\s*@jsx\-tpl\s+([\w\-]+)\s*\*\//g,
+var tplAnnotations = /["']\s*@jsx\-tpl\s+([\w\-]+)\s*['"]/g,
     tplAttr = 'jsx-tpl',
-    renderAnnotations = /<!--\s*@render\s+([\w\-]+)\s*-->/g,
+    renderAnnotation = /@render\s+([\w\-]+)/,
+    renderAnnotationComments = /<!--\s*@render\s+([\w\-]+)\s*-->/g,
     spreadAttr = /jsx\-spread="([\$\w]+)"/g,
     renderReturnSelector =
         'call[callee.object.name="React"][callee.property.name="createClass"]'+
@@ -19,45 +20,55 @@ function convert(js, html, callback) {
             return callback(err);
         }
 
-        var templates = {};
-
         prepareAttr(body);
 
-        domUtils.findAll(function (node) {
-            return domUtils.hasAttrib(node, tplAttr);
-        }, body.children).forEach(function (node) {
+        removeComments(body);
+
+        var tplList = findNodesByAttr(body, tplAttr);
+
+        var templates = {};
+        tplList.forEach(function (node) {
             var name = node.attribs[tplAttr];
             delete node.attribs[tplAttr];
-
             templates[name] = clearAttrQuotes(domUtils.getOuterHTML(node));
-
-            domUtils.removeElement(node);
         });
+
+        removeNodes(tplList);
 
         var _return = search(renderReturnSelector, js),
             _props = search(renderReturnSelector + ' > obj > prop', js),
             props = {};
 
-        _props.forEach(function (prop) {
-            var name = prop.key.name,
-                body = prop.value.body,
-                value = js.slice(body.start, body.end);
+        try {
+            _props.forEach(function (prop) {
+                var name = prop.key.name,
+                    body = prop.value.body,
+                    value = js.slice(body.start, body.end);
 
-            value = value.replace(tplAnnotations, function (x, name) {
-                return format('(%s)', templates[name]);
+                value = value.replace(tplAnnotations, function (x, name) {
+                    if (!templates.hasOwnProperty(name)) {
+                        throw new Error('JSX template "' + name + '" not exists');
+                    }
+
+                    return format('(%s)', templates[name]);
+                });
+
+                props[name] = value;
             });
-
-            props[name] = value;
-        });
+        }
+        catch (e) {
+            return callback(e);
+        }
 
         var template = clearAttrQuotes(domUtils.getOuterHTML(body));
 
         try {
             template = template
-                .replace(renderAnnotations, function (x, name) {
+                .replace(renderAnnotationComments, function (x, name) {
                     if (!props.hasOwnProperty(name)) {
-                        throw new Error('Template "' + name + '" not exists');
+                        throw new Error('Render template "' + name + '" not exists');
                     }
+
                     return props[name];
                 })
             ;
@@ -69,8 +80,8 @@ function convert(js, html, callback) {
         if (_return.length === 0) {
             return callback(new Error('React.createClass return: option not found'));
         }
-        else if (_return.length > 2) {
-            return callback(new Error('More then one React.createClass return: option'));
+        else if (_return.length > 1) {
+            return callback(new Error('More then one React.createClass return: option found, should be only one'));
         }
         else {
             js = insert(js, _return[0].start, _return[0].end, format('return (%s);', template));
@@ -199,4 +210,27 @@ function clearAttrQuotes(html) {
         .replace(/="~~~\{/g, '={').replace(/}~~~"/g, '}')
         .replace(spreadAttr, '{...$1}')
     ;
+}
+
+function findNodesByAttr(body, attrName) {
+    return domUtils.findAll(function (node) {
+        return domUtils.hasAttrib(node, attrName);
+    }, body.children);
+}
+
+function removeNodes(nodeArray) {
+    nodeArray.forEach(function (node) {
+        domUtils.removeElement(node);
+    });
+}
+
+function removeComments(node) {
+    if (node.type === 'comment' && !renderAnnotation.test(node.data)) {
+        domUtils.removeElement(node);
+    }
+    else if (node.type === 'tag' && node.children) {
+        for (var i = 0; i < node.children.length; i++) {
+            removeComments(node.children[i]);
+        }
+    }
 }
