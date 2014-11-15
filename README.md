@@ -132,6 +132,41 @@ Lets call attribute with this unique id just like annotation.
 Lets say that all tags with attribute `jsx-tpl` will be detached from template and can be used only in classes to replace
 `@jsx-tpl` annotations. So basically they can be anywhere in template.
 
+And last thing, what if we want many templates in one html file? Lets add `jsx-class` attribute with [displayName](http://facebook.github.io/react/docs/component-specs.html#displayname) value of
+react class to element in template to join them
+```html
+<div jsx-class="List">
+    <ul>
+        <!-- @render list -->
+        <li jsx-tpl="item" class={style}>{m}</li>
+    </ul>
+
+    <p>Selected: {this.props.items[this.state.focused]}</p>
+</div>
+
+<div jsx-class="SomeOtherComponent">
+    ...
+</div>
+```
+So we should add to our classes filed `displayName:`
+```javascript
+React.createClass({
+    displayName: 'List',
+    //...
+    render: function () {
+        //...
+    }
+});
+
+React.createClass({
+    displayName: 'SomeOtherComponent',
+    //...
+    render: function () {
+        //...
+    }
+});
+```
+
 ## Installation
 
 `npm install react-st`

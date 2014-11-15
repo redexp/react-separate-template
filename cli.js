@@ -10,6 +10,7 @@ app
     .option('-j, --js <path>', 'Input js file path')
     .option('-x, --html [path]', 'Input html file path, default is js file path but with .html extension')
     .option('-o, --out [path]', 'Output file path, default is js file path but with .jsx extension')
+    .option('-r, --target [file|stdout]', 'Type of output: file (default) or stdout')
     .option('-t, --type [jsx|js]', 'Type of output file, default is jsx. If you will specify js then jsx code will be converted to js with react-tools')
     .parse(process.argv);
 
@@ -28,5 +29,10 @@ convert(js, html, function (err, jsx) {
         jsx = react.transform(jsx);
     }
 
-    fs.writeFileSync(fileJsx, jsx);
+    if (app.target === 'stdout') {
+        console.log(jsx);
+    }
+    else {
+        fs.writeFileSync(fileJsx, jsx);
+    }
 });

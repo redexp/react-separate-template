@@ -1,4 +1,6 @@
 var List = React.createClass({
+    displayName: 'List',
+
     getInitialState: function() {
         return {focused: 0};
     },
@@ -24,5 +26,13 @@ var List = React.createClass({
                 self.state
             }
         };
+    }
+});
+
+var Item = React.createClass({
+    displayName: 'Item',
+    render: function () {
+        console.log('test');
+        return;
     }
 });
