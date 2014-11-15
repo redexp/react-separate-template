@@ -173,8 +173,8 @@ React.createClass({
 
 ## Usage from command line
 
-Just run `react-st -j test/menu.js`. It will take file [test/menu.js](test/menu.js), join with [test/menu.html](test/menu.html)
-and save to [test/menu.jsx](test/menu.jsx)
+Just run `react-st -j test/js/menu.js`. It will take file [test/js/menu.js](test/js/menu.js), join with [test/js/menu.html](test/js/menu.html)
+and save to [test/js/menu.jsx](test/js/menu.jsx)
 
 To see all options run `react-st -h`
 
