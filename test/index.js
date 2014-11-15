@@ -1,9 +1,9 @@
-var conv = require('../../conv'),
+var conv = require('../conv'),
     expect = require('chai').expect,
     fs = require('fs');
 
 function file(path) {
-    return fs.readFileSync(__dirname + '/' + path).toString();
+    return fs.readFileSync(__dirname + '/js/' + path).toString();
 }
 
 describe('convert function', function () {
@@ -12,6 +12,7 @@ describe('convert function', function () {
 
     it ('should convert js + html to jsx', function (done) {
         conv(js, html, function (err, jsx) {
+            expect(err).to.be.null;
             expect(jsx).to.equal(file('menu.jsx'));
             done();
         });

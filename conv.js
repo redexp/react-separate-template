@@ -3,7 +3,7 @@ var htmlParser = require('./lib/parser'),
     sQuery = require('grasp').search('squery'),
     toHtml = require('./lib/stringify');
 
-module.exports = catchException(convert);
+module.exports = convert;
 
 var tplAnnotations = /["']\s*@jsx\-tpl\s+([\w\-]+)\s*['"]/g,
     tplAttr = 'jsx-tpl',
@@ -69,44 +69,54 @@ function convert(js, html, callback) {
 
     var ranges = [];
 
-    reactClasses.forEach(function (reactClass) {
-        var node = dom.findNodesByAttrValue(body, classAttr, reactClass.name);
+    try {
+        reactClasses.forEach(function (reactClass) {
+            var node = dom.findNodesByAttrValue(body, classAttr, reactClass.name);
 
-        if (node.length === 0) {
-            throw new Error('Template for class "'+ reactClass.name +'" not found');
-        }
-        else if (node.length > 1) {
-            throw new Error('Too many templates for class "'+ reactClass.name +'"');
-        }
-
-        node = node[0];
-
-        delete node.attr[classAttr];
-
-        var html = toHtml(node).replace(renderAnnotationComments, function (x, name) {
-            if (!has(reactClass.returnProps, name)) {
-                throw new Error('Render "'+ name +'" not found');
+            if (node.length === 0) {
+                throw new Error('Template for class "'+ reactClass.name +'" not found');
+            }
+            else if (node.length > 1) {
+                throw new Error('Too many templates for class "'+ reactClass.name +'"');
             }
 
-            return reactClass.returnProps[name];
-        });
+            node = node[0];
 
-        ranges.push({
-            start: reactClass.renderReturn.start,
-            end: reactClass.renderReturn.end,
-            str: 'return ' + html.trim() + ';'
+            delete node.attr[classAttr];
+
+            var html = toHtml(node).replace(renderAnnotationComments, function (x, name) {
+                if (!has(reactClass.returnProps, name)) {
+                    throw new Error('Render "'+ name +'" not found');
+                }
+
+                return reactClass.returnProps[name];
+            });
+
+            ranges.push({
+                start: reactClass.renderReturn.start,
+                end: reactClass.renderReturn.end,
+                str: 'return ' + html.trim() + ';'
+            });
         });
-    });
+    }
+    catch (e) {
+        return callback(e);
+    }
 
     var jsx = replace(js, ranges);
 
-    jsx = jsx.replace(tplAnnotations, function (x, name) {
-        if (!has(jsxTplHtml, name)) {
-            throw new Error('jsx-tpl "'+ name +'" not found');
-        }
+    try {
+        jsx = jsx.replace(tplAnnotations, function (x, name) {
+            if (!has(jsxTplHtml, name)) {
+                throw new Error('jsx-tpl "'+ name +'" not found');
+            }
 
-        return jsxTplHtml[name];
-    });
+            return jsxTplHtml[name];
+        });
+    }
+    catch (e) {
+        return callback(e);
+    }
 
     callback(null, jsx);
 }
@@ -248,16 +258,4 @@ function repeat(char, length) {
         str += char;
     }
     return str;
-}
-
-function catchException(func) {
-    return function () {
-        try {
-            return func.apply(this, arguments);
-        }
-        catch (e) {
-            var callback = arguments[arguments.length - 1];
-            return callback(e);
-        }
-    };
 }

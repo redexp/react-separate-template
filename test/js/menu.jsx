@@ -24,6 +24,16 @@ var List = React.createClass({
             }
     
     
-</ul>
+</ul>;
+    }
+});
+
+var Item = React.createClass({
+    displayName: 'Item',
+    render: function () {
+        console.log('test');
+        return <div>
+    <input type="text" />
+</div>;
     }
 });
