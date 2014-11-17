@@ -2,6 +2,9 @@ React separate template
 =======================
 
 1. [Solution description](#solution-description)
+   1. [@render](#render)
+   2. [jsx-tpl](#jsx-tpl)
+   3. [jsx-class](#jsx-class)
 2. [Installation](#installation)
 3. [Usage from command line](#usage-from-command-line)
 4. [Usage from code](#usage-from-code)
@@ -97,7 +100,7 @@ var MenuExample = React.createClass({
 But wait, not that again, HTML in code, maybe we can take out it, but it should be in same template file. Maybe we will
 make some annotation which will be replaced with HTML (with some unique id) from our template?
 
-### @jsx-tpl
+### jsx-tpl
 
 ```javascript
 var MenuExample = React.createClass({
@@ -176,7 +179,7 @@ var x = React.createClass({
 });
 ```
 
-*Extra feature* of `jsx-class`. If you define `jsx-class` in another `jsx-class` then this definition will be replaced to
+**Extra feature** of `jsx-class`. If you define `jsx-class` in another `jsx-class` then this definition will be replaced to
 the end of body and instead of it will instance of this class. All attributes with curly brackets will be with instance,
 
 
@@ -185,7 +188,9 @@ Example
 <div>
     <ul jsx-class="List">
         <!-- @render list -->
-        <li jsx-class="Item" user="{user}" class="row" data-id="1">{user.name}</li>
+        <li jsx-class="Item" jsx-tpl="item" user="{user}" class="row" data-id="1">
+            <h3>{user.name}</h3>
+        </li>
     </ul>
 </div>
 ```
@@ -194,11 +199,13 @@ Will be converted to
 <div>
     <ul jsx-class="List">
         <!-- @render list -->
-        <Item user="{user}" />
+        <Item jsx-tpl="item" user="{user}" />
     </ul>
 </div>
 
-<li jsx-class="Item" class="row" data-id="1">{user.name}</li>
+<li jsx-class="Item" class="row" data-id="1">
+    <h3>{user.name}</h3>
+</li>
 ```
 
 ## Installation
