@@ -1,0 +1,13 @@
+<ul jsx-class="UsersList" class="users">
+    <!--@render users-->
+    <li jsx-tpl="user">
+        <h2>{user.name}</h2>
+
+        <ul jsx-class="FriendsList" friends="{user.friends}" class="friends">
+            <!--@render friends-->
+            <li jsx-tpl="friend">
+                <h3>{friend.name}</h3>
+            </li>
+        </ul>
+    </li>
+</ul>

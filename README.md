@@ -57,6 +57,9 @@ my CSS and see results without running whole app. I want to se template like thi
 ```
 Okay, first of all we need to put `this.props.items.map(...)` in `ul`. I thought, annotation is good enough to make link
 to some function like this
+
+### @render
+
 ```html
 <div>
     <ul>
@@ -93,6 +96,9 @@ var MenuExample = React.createClass({
 ```
 But wait, not that again, HTML in code, maybe we can take out it, but it should be in same template file. Maybe we will
 make some annotation which will be replaced with HTML (with some unique id) from our template?
+
+### @jsx-tpl
+
 ```javascript
 var MenuExample = React.createClass({
 
@@ -132,10 +138,13 @@ Lets call attribute with this unique id just like annotation.
 Lets say that all tags with attribute `jsx-tpl` will be detached from template and can be used only in classes to replace
 `@jsx-tpl` annotations. So basically they can be anywhere in template.
 
-And last thing, what if we want many templates in one html file? Lets add `jsx-class` attribute with [displayName](http://facebook.github.io/react/docs/component-specs.html#displayname) value of
+### jsx-class
+
+Last thing, what if we want many templates in one html file? Lets add `jsx-class` attribute with [displayName](http://facebook.github.io/react/docs/component-specs.html#displayname) value of
 react class to element in template to join them
+
 ```html
-<div jsx-class="List">
+<div jsx-class="Menu">
     <ul>
         <!-- @render list -->
         <li jsx-tpl="item" class={style}>{m}</li>
@@ -150,21 +159,46 @@ react class to element in template to join them
 ```
 So we should add to our classes filed `displayName:`
 ```javascript
-React.createClass({
-    displayName: 'List',
+var MenuExample = React.createClass({
+    displayName: 'Menu',
     //...
     render: function () {
         //...
     }
 });
 
-React.createClass({
+var x = React.createClass({
     displayName: 'SomeOtherComponent',
     //...
     render: function () {
         //...
     }
 });
+```
+
+*Extra feature* of `jsx-class`. If you define `jsx-class` in another `jsx-class` then this definition will be replaced to
+the end of body and instead of it will instance of this class. All attributes with curly brackets will be with instance,
+
+
+Example
+```html
+<div>
+    <ul jsx-class="List">
+        <!-- @render list -->
+        <li jsx-class="Item" user="{user}" class="row" data-id="1">{user.name}</li>
+    </ul>
+</div>
+```
+Will be converted to
+```html
+<div>
+    <ul jsx-class="List">
+        <!-- @render list -->
+        <Item user="{user}" />
+    </ul>
+</div>
+
+<li jsx-class="Item" class="row" data-id="1">{user.name}</li>
 ```
 
 ## Installation

@@ -36,3 +36,62 @@ var Item = React.createClass({
         return;
     }
 });
+
+var UsersList = React.createClass({
+    displayName: 'UsersList',
+    render: function () {
+        return {
+            users: function () {
+                this.props.users.map(function (user) {
+                    return "@jsx-tpl user";
+                });
+            }
+        };
+    }
+});
+
+var FriendsList = React.createClass({
+    displayName: 'FriendsList',
+    render: function () {
+        return {
+            friends: function () {
+                this.props.friends.map(function (friend) {
+                    return "@jsx-tpl friend";
+                });
+            }
+        };
+    }
+});
+
+var TestList = React.createClass({
+    displayName: 'TestList',
+    render: function () {
+        var x = "@jsx-tpl test-item";
+        return {
+            item: function () {
+                return x;
+            }
+        };
+    }
+});
+
+var TestItem = React.createClass({
+    displayName: 'TestItem',
+    render: function () {
+        return;
+    }
+});
+
+var TestWithoutRender = React.createClass({
+    displayName: 'TestWithoutRender'
+});
+
+var TestWithoutDisplayName = React.createClass({
+    render: function () {
+        return {
+            item: function () {
+                this;
+            }
+        };
+    }
+});

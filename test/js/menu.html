@@ -5,6 +5,27 @@
     <Item jsx-tpl="item" class="item {style}" jsx-spread="attr" title="Item">{m}</Item>
 </ul>
 
-<div jsx-class="Item">
+<li jsx-class="Item">
     <input type="text"/>
+</li>
+
+<ul jsx-class="UsersList" class="users">
+    <!--@render users-->
+    <li jsx-tpl="user">
+        <h2>{user.name}</h2>
+
+        <ul jsx-class="FriendsList" friends="{user.friends}" class="friends" data-id="1">
+            <!--@render friends-->
+            <li jsx-tpl="friend">
+                <h3>{friend.name}</h3>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<div jsx-class="TestList">
+    <!--@render item-->
+    <li jsx-class="TestItem" jsx-tpl="test-item">
+        <span>{test.name}</span>
+    </li>
 </div>

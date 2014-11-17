@@ -1,7 +1,8 @@
 var htmlParser = require('./lib/parser'),
     dom = require('./lib/dom-utils'),
     sQuery = require('grasp').search('squery'),
-    toHtml = require('./lib/stringify');
+    toHtml = require('./lib/stringify'),
+    extend = require('node.extend');
 
 module.exports = convert;
 
@@ -11,6 +12,10 @@ var tplAnnotations = /["']\s*@jsx\-tpl\s+([\w\-]+)\s*['"]/g,
     renderAnnotation = /@render\s+([\w\-]+)/,
     renderAnnotationComments = /<!--\s*@render\s+([\w\-]+)\s*-->/g,
     spreadAttr = /jsx\-spread="([\$\w]+)"/g,
+    jsxPreparedAttr = /^~~~.*~~~$/,
+    dataAttr = /^data-\w+/,
+    blockStartWithReturn = /^\{[\r\n\s\t]*return\s+/,
+    blockEndWithSemicolon = /;[\r\n\s\t]*}$/,
     classSelector = 'call[callee.object.name="React"][callee.property.name="createClass"]',
     classPropsSelector = classSelector + ' > obj > prop',
     classReturnSelector = classPropsSelector + ' > func-exp > block > return';
@@ -21,6 +26,36 @@ function convert(js, html, callback) {
     prepareAttrWithBrackets(body);
 
     removeRegularComments(body);
+
+    var classes = dom.findNodesByAttr(body, classAttr);
+    classes.forEach(function (item) {
+        if (!dom.closestParentWithAttrList(item, [classAttr, tplAttr])) return;
+
+        var newNode = dom.replaceWith(item, {
+            type: 'tag',
+            name: item.attr[classAttr],
+            attr: clone(item.attr),
+            children: [],
+            unary: true
+        });
+
+        delete newNode.attr[classAttr];
+        delete newNode.attr['className'];
+        delete item.attr['jsx-tpl'];
+
+        for (var attr in item.attr) {
+            if (!has(item.attr, attr)) continue;
+
+            if (jsxPreparedAttr.test(item.attr[attr])) {
+                delete item.attr[attr];
+            }
+            else if (dataAttr.test(attr)) {
+                delete newNode.attr[attr];
+            }
+        }
+
+        dom.appendTo(body, item);
+    });
 
     var tplNodeList = dom.findNodesByAttr(body, tplAttr);
 
@@ -54,7 +89,10 @@ function convert(js, html, callback) {
 
         if (_return.argument && _return.argument.type === 'ObjectExpression') {
             _return.argument.properties.forEach(function (prop) {
-                returnProps[prop.key.name] = slice(js, prop.value.body);
+                returnProps[prop.key.name] = slice(js, prop.value.body)
+                    .replace(blockStartWithReturn, '{')
+                    .replace(blockEndWithSemicolon, '}')
+                ;
             });
         }
 
@@ -84,7 +122,7 @@ function convert(js, html, callback) {
 
             delete node.attr[classAttr];
 
-            var html = toHtml(node).replace(renderAnnotationComments, function (x, name) {
+            var html = clearAttrWithBrackets(toHtml(node)).replace(renderAnnotationComments, function (x, name) {
                 if (!has(reactClass.returnProps, name)) {
                     throw new Error('Render "'+ name +'" not found');
                 }
@@ -258,4 +296,8 @@ function repeat(char, length) {
         str += char;
     }
     return str;
+}
+
+function clone(obj) {
+    return extend(true, {}, obj);
 }
