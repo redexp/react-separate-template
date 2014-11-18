@@ -82,7 +82,7 @@ var MenuExample = React.createClass({
         var self = this;
 
         return {
-            item: function () {
+            list: function () {
                 this.props.items.map(function(m, index) {
                     var style = '';
 
@@ -111,7 +111,7 @@ var MenuExample = React.createClass({
         var self = this;
 
         return {
-            item: function () {
+            list: function () {
                 this.props.items.map(function(m, index) {
                     var style = '';
 
