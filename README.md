@@ -1,6 +1,8 @@
 React separate template
 =======================
 
+[![Build Status](https://travis-ci.org/redexp/react-separate-template.png?branch=master)](http://travis-ci.org/redexp/react-separate-template)
+
 1. [Solution description](#solution-description)
    1. [@render](#render)
    2. [jsx-tpl](#jsx-tpl)
