@@ -1,6 +1,6 @@
 {
   "name": "react-st",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "React separate template",
   "main": "conv.js",
   "dependencies": {

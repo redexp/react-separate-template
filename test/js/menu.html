@@ -14,18 +14,18 @@
     <li jsx-tpl="user">
         <h2>{user.name}</h2>
 
-        <ul jsx-class="FriendsList" friends="{user.friends}" class="friends" data-id="1">
+        <ul jsx-class="FriendsList" jsx-instance="true" friends="{user.friends}" class="friends" data-id="1">
             <!--@render friends-->
             <li jsx-tpl="friend">
                 <h3>{friend.name}</h3>
             </li>
         </ul>
+
+        <div jsx-class="TestList">
+            <!--@render item-->
+            <li jsx-class="TestItem" jsx-instance="true" jsx-tpl="test-item">
+                <span>{test.name}</span>
+            </li>
+        </div>
     </li>
 </ul>
-
-<div jsx-class="TestList">
-    <!--@render item-->
-    <li jsx-class="TestItem" jsx-tpl="test-item">
-        <span>{test.name}</span>
-    </li>
-</div>

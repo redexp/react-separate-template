@@ -7,11 +7,13 @@ React separate template
    1. [@render](#render)
    2. [jsx-tpl](#jsx-tpl)
    3. [jsx-class](#jsx-class)
-2. [Installation](#installation)
-3. [Usage from command line](#usage-from-command-line)
-4. [Usage from code](#usage-from-code)
-5. [Additional features](#additional-features)
-6. [Gulp plugin](#gulp-plugin)
+   3. [jsx-instance](#jsx-instance)
+2. [TodoMVC example](#todomvc-example)
+3. [Installation](#installation)
+4. [Usage from command line](#usage-from-command-line)
+5. [Usage from code](#usage-from-code)
+6. [Additional features](#additional-features)
+7. [Gulp plugin](#gulp-plugin)
 
 First problem of react is HTML inside our JS files and there is no way to make them separate.
 
@@ -181,16 +183,16 @@ var x = React.createClass({
 });
 ```
 
-**Extra feature** of `jsx-class`. If you define `jsx-class` in another `jsx-class` then this definition will be replaced to
-the end of body and instead of it will instance of this class. All attributes with curly brackets will be with instance,
+### jsx-instance
+
+If you define `jsx-class` in another `jsx-class` or `jsx-tpl` then this definition will be replaced to the end of body, but what if you need instance of this class right in this place? Just add `jsx-instance="true"` to it. All attributes with curly brackets will be with instance.
 
 
 Example
 ```html
 <div>
     <ul jsx-class="List">
-        <!-- @render list -->
-        <li jsx-class="Item" jsx-tpl="item" user="{user}" class="row" data-id="1">
+        <li jsx-class="Item" jsx-instance="true" user="{user}" class="row" data-id="1">
             <h3>{user.name}</h3>
         </li>
     </ul>
@@ -200,7 +202,6 @@ Will be converted to
 ```html
 <div>
     <ul jsx-class="List">
-        <!-- @render list -->
         <Item jsx-tpl="item" user="{user}" />
     </ul>
 </div>
@@ -209,6 +210,11 @@ Will be converted to
     <h3>{user.name}</h3>
 </li>
 ```
+
+## TodoMVC Example
+
+Here original implementation of [TodoMVC project on React](https://github.com/tastejs/todomvc/tree/gh-pages/examples/react) and here same project but with separated html [examples/todomvc](examples/todomvc). You can see that each component has it template.
+But wait, checkout one combined template [components/index.html](examples/todomvc/js/components/index.html) for all components. You can use it to compile all components. You can just open it and see how your app looks like without running js code. How cool is that?
 
 ## Installation
 

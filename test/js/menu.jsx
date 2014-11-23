@@ -48,6 +48,8 @@ var UsersList = React.createClass({
         <h2>{user.name}</h2>
 
         <FriendsList friends={user.friends} />
+
+        
     </li>;
                 })}
     
@@ -75,9 +77,9 @@ var TestList = React.createClass({
     render: function () {
         var x = <TestItem />;
         return <div>
-    {x}
-    
-</div>;
+            {x}
+            
+        </div>;
     }
 });
 
@@ -85,8 +87,8 @@ var TestItem = React.createClass({
     displayName: 'TestItem',
     render: function () {
         return <li>
-        <span>{test.name}</span>
-    </li>;
+                <span>{test.name}</span>
+            </li>;
     }
 });
 

@@ -9,6 +9,7 @@ module.exports = convert;
 var tplAnnotations = /["']\s*@jsx\-tpl\s+([\w\-]+)\s*['"]/g,
     tplAttr = 'jsx-tpl',
     classAttr = 'jsx-class',
+    instanceAttr = 'jsx-instance',
     renderAnnotation = /@render\s+([\w\-]+)/,
     renderAnnotationComments = /<!--\s*@render\s+([\w\-]+)\s*-->/g,
     spreadAttr = /jsx\-spread="([\$\w]+)"/g,
@@ -31,27 +32,34 @@ function convert(js, html, callback) {
     classes.forEach(function (item) {
         if (!dom.closestParentWithAttrList(item, [classAttr, tplAttr])) return;
 
-        var newNode = dom.replaceWith(item, {
-            type: 'tag',
-            name: item.attr[classAttr],
-            attr: clone(item.attr),
-            children: [],
-            unary: true
-        });
+        if (item.attr[instanceAttr] === 'true') {
+            delete item.attr[instanceAttr];
 
-        delete newNode.attr[classAttr];
-        delete newNode.attr['className'];
-        delete item.attr['jsx-tpl'];
+            var newNode = dom.replaceWith(item, {
+                type: 'tag',
+                name: item.attr[classAttr],
+                attr: clone(item.attr),
+                children: [],
+                unary: true
+            });
 
-        for (var attr in item.attr) {
-            if (!has(item.attr, attr)) continue;
+            delete newNode.attr[classAttr];
+            delete newNode.attr['className'];
+            delete item.attr[tplAttr];
 
-            if (jsxPreparedAttr.test(item.attr[attr])) {
-                delete item.attr[attr];
+            for (var attr in item.attr) {
+                if (!has(item.attr, attr)) continue;
+
+                if (jsxPreparedAttr.test(item.attr[attr])) {
+                    delete item.attr[attr];
+                }
+                else if (dataAttr.test(attr)) {
+                    delete newNode.attr[attr];
+                }
             }
-            else if (dataAttr.test(attr)) {
-                delete newNode.attr[attr];
-            }
+        }
+        else {
+            dom.removeNode(item);
         }
 
         dom.appendTo(body, item);
