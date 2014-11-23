@@ -1,0 +1,23 @@
+<div jsx-class="TodoApp">
+    <header id="header">
+        <h1>todos</h1>
+        <input  ref="newField"
+                id="new-todo"
+                placeholder="What needs to be done?"
+                onKeyDown="{this.handleNewTodoKeyDown}"
+                autoFocus="{true}"/>
+    </header>
+
+    <section id="main" class="{cx({hidden: todos.length === 0})}">
+        <input id="toggle-all"
+               type="checkbox"
+               onChange="{this.toggleAll}"
+               checked="{activeTodoCount === 0}"/>
+
+        <ul id="todo-list">
+            {todoItems}
+        </ul>
+    </section>
+
+    <!-- @render footer -->
+</div>

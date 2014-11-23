@@ -1,0 +1,32 @@
+<footer jsx-class="TodoFooter" id="footer">
+    <span id="todo-count">
+        <strong>{this.props.count}</strong> {activeTodoWord} left
+    </span>
+    <ul id="filters">
+        <li>
+            <a href="#/" class="{cx({selected: nowShowing=== app.ALL_TODOS})}">
+                All
+            </a>
+        </li>
+        <!-- @render space -->
+        <li>
+            <a href="#/active" class="{cx({selected: nowShowing=== app.ACTIVE_TODOS})}">
+                Active
+            </a>
+        </li>
+        <!-- @render space -->
+        <li>
+            <a href="#/completed" class="{cx({selected: nowShowing=== app.COMPLETED_TODOS})}">
+                Completed
+            </a>
+        </li>
+    </ul>
+
+    <!-- @render clearButton -->
+
+    <button jsx-tpl="clear-completed"
+            id="clear-completed"
+            onClick="{this.props.onClearCompleted}">
+        Clear completed ({this.props.completedCount})
+    </button>
+</footer>

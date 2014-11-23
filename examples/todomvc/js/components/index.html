@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en" data-framework="react">
+<head>
+    <meta charset="utf-8">
+    <title>React • TodoMVC</title>
+    <link rel="stylesheet" href="../../bower_components/todomvc-common/base.css">
+</head>
+<body>
+
+<section id="todoapp">
+    <div jsx-class="TodoApp">
+        <header id="header">
+            <h1>todos</h1>
+            <input  ref="newField"
+                    id="new-todo"
+                    placeholder="What needs to be done?"
+                    onKeyDown="{this.handleNewTodoKeyDown}"
+                    autoFocus="{true}"/>
+        </header>
+
+        <section id="main" class="{cx({hidden: todos.length === 0})}">
+            <input id="toggle-all"
+                   type="checkbox"
+                   onChange="{this.toggleAll}"
+                   checked="{activeTodoCount === 0}"/>
+
+            <ul id="todo-list">
+                <!-- @render todoItems -->
+
+                <li jsx-class="TodoItem" class="{classes}">
+                    <div class="view">
+                        <input class="toggle"
+                               type="checkbox"
+                               checked="{this.props.todo.completed}"
+                               onChange="{this.props.onToggle}"/>
+
+                        <label onDoubleClick="{this.handleEdit}">{this.props.todo.title}</label>
+
+                        <button class="destroy" onClick="{this.props.onDestroy}"/>
+                    </div>
+
+                    <input  ref="editField"
+                            class="edit"
+                            value="{this.state.editText}"
+                            onBlur="{this.handleSubmit}"
+                            onChange="{this.handleChange}"
+                            onKeyDown="{this.handleKeyDown}"/>
+                </li>
+            </ul>
+        </section>
+
+        <!-- @render footer -->
+
+        <footer jsx-class="TodoFooter" id="footer">
+            <span id="todo-count">
+                <strong>{this.props.count}</strong> {activeTodoWord} left
+            </span>
+            <ul id="filters">
+                <li>
+                    <a href="#/" class="{cx({selected: nowShowing=== app.ALL_TODOS})}">
+                        All
+                    </a>
+                </li>
+                <!-- @render space -->
+                <li>
+                    <a href="#/active" class="{cx({selected: nowShowing=== app.ACTIVE_TODOS})}">
+                        Active
+                    </a>
+                </li>
+                <!-- @render space -->
+                <li>
+                    <a href="#/completed" class="{cx({selected: nowShowing=== app.COMPLETED_TODOS})}">
+                        Completed
+                    </a>
+                </li>
+            </ul>
+
+            <!-- @render clearButton -->
+
+            <button jsx-tpl="clear-completed"
+                    id="clear-completed"
+                    onClick="{this.props.onClearCompleted}">
+                Clear completed ({this.props.completedCount})
+            </button>
+        </footer>
+    </div>
+</section>
+
+<footer id="info">
+    <p>Double-click to edit a todo</p>
+    <p>Created by <a href="http://github.com/petehunt/">petehunt</a></p>
+    <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+</footer>
+
+</body>
+</html>
