@@ -23,47 +23,17 @@ describe('convert function', function () {
 
         conv(js, badHtml, function (err, jsx) {
             expect(err).not.to.be.null;
-            expect(err.message).to.equal('Render "test" not found');
+            expect(err.message).to.equal('Render return function "test" for class List not found');
             done();
         });
     });
 
-    it ('should throw error: "JSX template not found"', function (done) {
+    it ('should throw error: "HTML template not found"', function (done) {
         var badJs = js.replace('@jsx-tpl item', '@jsx-tpl test');
 
         conv(badJs, html, function (err, jsx) {
             expect(err).not.to.be.null;
-            expect(err.message).to.equal('jsx-tpl "test" not found');
-            done();
-        });
-    });
-
-    it ('should throw error: "Template not found"', function (done) {
-        var badHtml = html.replace('jsx-class="List"', 'jsx-class="Test"');
-
-        conv(js, badHtml, function (err, jsx) {
-            expect(err).not.to.be.null;
-            expect(err.message).to.equal('Template for class "List" not found');
-            done();
-        });
-    });
-
-    it ('should throw error: "Too many templates found"', function (done) {
-        var badHtml = html + '<div jsx-class="List" />';
-
-        conv(js, badHtml, function (err, jsx) {
-            expect(err).not.to.be.null;
-            expect(err.message).to.equal('Too many templates for class "List"');
-            done();
-        });
-    });
-
-    it ('should work without render function', function (done) {
-        var badJs = js.replace('@jsx-tpl item', '@jsx-tpl test');
-
-        conv(badJs, html, function (err, jsx) {
-            expect(err).not.to.be.null;
-            expect(err.message).to.equal('jsx-tpl "test" not found');
+            expect(err.message).to.equal('HTML template for jsx-tpl "test" not found');
             done();
         });
     });

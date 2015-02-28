@@ -1,36 +1,93 @@
-var htmlParser = require('./lib/parser'),
+var toDom = require('./lib/parser'),
     dom = require('./lib/dom-utils'),
-    sQuery = require('grasp').search('squery'),
+    q = require('simple-object-query'),
+    find = q.find,
+    replace = q.replace,
+    where = q.where,
     toHtml = require('./lib/stringify'),
+    gen = require('escodegen'),
+    toAst = require('esprima').parse,
     extend = require('node.extend');
 
 module.exports = convert;
 
-var tplAnnotations = /["']\s*@jsx\-tpl\s+([\w\-]+)\s*['"]/g,
-    tplAttr = 'jsx-tpl',
+var tplAttr = 'jsx-tpl',
     classAttr = 'jsx-class',
     instanceAttr = 'jsx-instance',
-    renderAnnotation = /@render\s+([\w\-]+)/,
-    renderAnnotationComments = /<!--\s*@render\s+([\w\-]+)\s*-->/g,
-    spreadAttr = /jsx\-spread="([\$\w]+)"/g,
-    jsxPreparedAttr = /^~~~.*~~~$/,
-    dataAttr = /^data-\w+/,
-    blockStartWithReturn = /^\{[\r\n\s\t]*return\s+/,
-    blockEndWithSemicolon = /;[\r\n\s\t]*}$/,
-    classSelector = 'call[callee.object.name="React"][callee.property.name="createClass"]',
-    classPropsSelector = classSelector + ' > obj > prop',
-    classReturnSelector = classPropsSelector + ' > func-exp > block > return';
+    renderAnnotation = /^\s*@render\s+([\w\-\$]+)/,
+    renderAnnotationCommentSelector = {
+        type: 'comment',
+        data: renderAnnotation
+    },
+    tplAnnotation = /^\s*@jsx\-tpl\s+([\w\-\$]+)/,
+    tplAnnotationSelector = {
+        "type": "Literal",
+        "value": tplAnnotation
+    },
+    classSelectors = [
+        {
+            selector: {
+                'id.type': 'Identifier',
+                'init.callee.object.name': 'React',
+                'init.callee.property.name': 'createClass'
+            },
+            map: function (item) {
+                return {
+                    name: item.id.name,
+                    body: item.init
+                }
+            }
+        },
+        {
+            selector: {
+                'key.type': 'Identifier',
+                'value.callee.object.name': 'React',
+                'value.callee.property.name': 'createClass'
+            },
+            map: function (item) {
+                return {
+                    name: item.key.name,
+                    body: item.value
+                }
+            }
+        },
+        {
+            selector: {
+                'left.type': 'MemberExpression',
+                'right.callee.object.name': 'React',
+                'right.callee.property.name': 'createClass'
+            },
+            map: function (item) {
+                return {
+                    name: item.left.object.name + '.' + item.left.property.name,
+                    body: item.right
+                }
+            }
+        }
+    ],
+    renderReturnSelector = [
+        {
+            'key.name': 'render'
+        },
+        'value.body.body',
+        q.flatten,
+        {
+            'type': 'ReturnStatement'
+        }
+    ],
+    startWithReturn = /^\s*return\s+/,
+    endWithSemicolon = /\s*;\s*$/;
 
 function convert(js, html, callback) {
-    var body = htmlParser(html);
+    js = toAst(js);
 
-    prepareAttrWithBrackets(body);
+    var body = toDom(html);
 
-    removeRegularComments(body);
+    var htmlClasses = {};
 
     var classes = dom.findNodesByAttr(body, classAttr);
     classes.forEach(function (item) {
-        if (!dom.closestParentWithAttrList(item, [classAttr, tplAttr])) return;
+        htmlClasses[item.attr[classAttr]] = item;
 
         if (item.attr[instanceAttr] === 'true') {
             delete item.attr[instanceAttr];
@@ -50,12 +107,7 @@ function convert(js, html, callback) {
             for (var attr in item.attr) {
                 if (!has(item.attr, attr)) continue;
 
-                if (jsxPreparedAttr.test(item.attr[attr])) {
-                    delete item.attr[attr];
-                }
-                else if (dataAttr.test(attr)) {
-                    delete newNode.attr[attr];
-                }
+                delete item.attr[attr];
             }
         }
         else {
@@ -63,249 +115,116 @@ function convert(js, html, callback) {
         }
 
         dom.appendTo(body, item);
+
+        delete item.attr[classAttr];
     });
 
     var tplNodeList = dom.findNodesByAttr(body, tplAttr);
 
-    var jsxTplHtml = {};
+    var htmlTemplates = {};
     tplNodeList.forEach(function (node) {
         var name = node.attr[tplAttr];
         delete node.attr[tplAttr];
-        jsxTplHtml[name] = clearAttrWithBrackets(toHtml(node));
+
+        htmlTemplates[name] = toHtml(node);
     });
 
     dom.removeNodes(tplNodeList);
 
-    var reactClasses = [];
-
-    search(classSelector, js).forEach(function (reactClass) {
-        var name, _return;
-        search(classPropsSelector, js, reactClass).forEach(function (prop) {
-            if (prop.key.name === 'displayName') {
-                name = prop.value.value;
+    try {
+        replace(js, tplAnnotationSelector, function (tpl) {
+            var name = tpl.value.match(tplAnnotation)[1];
+            if (!htmlTemplates[name]) {
+                throw new Error('HTML template for jsx-tpl "'+ name +'" not found');
             }
-            else if (prop.key.name === 'render') {
-                _return = search(classReturnSelector, js, prop.value.body);
-            }
+            return verbatimLiteral(htmlTemplates[name]);
         });
+    }
+    catch (e) {
+        return callback(e, null);
+    }
 
-        if (!name || !_return || !_return.length) return;
-
-        _return = _return[0];
-
-        var returnProps = {};
-
-        if (_return.argument && _return.argument.type === 'ObjectExpression') {
-            _return.argument.properties.forEach(function (prop) {
-                returnProps[prop.key.name] = slice(js, prop.value.body)
-                    .replace(blockStartWithReturn, '{')
-                    .replace(blockEndWithSemicolon, '}')
-                ;
-            });
-        }
-
-        reactClasses.push({
-            name: name,
-            start: reactClass.start,
-            end: reactClass.end,
-            renderReturn: _return,
-            returnProps: returnProps
-        });
+    var reactClasses = classSelectors.map(function (item) {
+        return find(js, item.selector).map(item.map);
     });
 
-    var ranges = [];
+    reactClasses = Array.prototype.concat.apply([], reactClasses);
 
     try {
-        reactClasses.forEach(function (reactClass) {
-            var node = dom.findNodesByAttrValue(body, classAttr, reactClass.name);
+        reactClasses.forEach(function(reactClass) {
+            var name = reactClass.name,
+                _return = where(reactClass.body.arguments[0].properties, renderReturnSelector);
 
-            if (node.length === 0) {
-                throw new Error('Template for class "'+ reactClass.name +'" not found');
+            if (!name || _return.length === 0) return;
+
+            _return = _return[0];
+
+            var htmlDom = htmlClasses[name];
+
+            if (!htmlDom) return;
+
+            var returnProps = {};
+
+            if (_return.argument && _return.argument.type === 'ObjectExpression') {
+                _return.argument.properties.forEach(function(prop) {
+                    var name = prop.key.name,
+                        body = prop.value.body;
+
+                    returnProps[name] = body.body;
+                });
             }
-            else if (node.length > 1) {
-                throw new Error('Too many templates for class "'+ reactClass.name +'"');
-            }
 
-            node = node[0];
+            replace({
+                source: htmlDom,
+                query: renderAnnotationCommentSelector,
+                exclude: ['parent', 'next', 'prev'],
+                callback: function(comment) {
+                    var name = comment.data.match(renderAnnotation)[1];
 
-            delete node.attr[classAttr];
+                    if (!returnProps[name]) {
+                        throw new Error('Render return function "' + name + '" for class ' + reactClass.name + ' not found');
+                    }
 
-            var html = clearAttrWithBrackets(toHtml(node)).replace(renderAnnotationComments, function (x, name) {
-                if (!has(reactClass.returnProps, name)) {
-                    throw new Error('Render "'+ name +'" not found');
+                    var data = toJs({type: 'Program', body: returnProps[name]})
+                        .replace(startWithReturn, '')
+                        .replace(endWithSemicolon, '');
+
+                    return {
+                        type: 'verbatim',
+                        data: '{' + data + '}'
+                    };
                 }
-
-                return reactClass.returnProps[name];
             });
 
-            ranges.push({
-                start: reactClass.renderReturn.start,
-                end: reactClass.renderReturn.end,
-                str: 'return ' + html.trim() + ';'
-            });
+            _return.argument = verbatimLiteral(toHtml(htmlDom));
         });
     }
     catch (e) {
-        return callback(e);
+        return callback(e, null);
     }
 
-    var jsx = replace(js, ranges);
+    callback(null, toJs(js));
+}
 
-    try {
-        jsx = jsx.replace(tplAnnotations, function (x, name) {
-            if (!has(jsxTplHtml, name)) {
-                throw new Error('jsx-tpl "'+ name +'" not found');
-            }
-
-            return jsxTplHtml[name];
-        });
-    }
-    catch (e) {
-        return callback(e);
-    }
-
-    callback(null, jsx);
+function toJs(ast) {
+    return gen.generate(ast, {verbatim: 'x-verbatim-property'});
 }
 
 function has(obj, field) {
-    return obj.hasOwnProperty(field);
-}
-
-function search(selector, code, scope) {
-    var list = sQuery(selector, code);
-    return !scope ? list : list.filter(function (item) {
-        return item.start >= scope.start && item.end <= scope.end;
-    });
-}
-
-function bracketsParser(str) {
-    var results = [],
-        level = 0,
-        i = 0;
-
-    if (str === null) {
-        console.log(str);
-    }
-
-    while (i < str.length) {
-        if (str.charAt(i) === '{') {
-            if (level === 0) {
-                results.push(i);
-            }
-            level++;
-        }
-        else if (str.charAt(i) === '}') {
-            level--;
-            if (level === 0) {
-                results.push(i + 1);
-            }
-        }
-
-        i++;
-    }
-
-    var list = [];
-    for (i = 0; i < results.length; i+=2) {
-        list.push({
-            start: results[i],
-            end: results[i + 1]
-        });
-    }
-
-    return list;
-}
-
-function prepareAttrWithBrackets(node) {
-    var parts, i;
-
-    var list = node.attr;
-    for (var name in list) {
-        if (!has(list, name)) continue;
-
-        parts = bracketsParser(list[name]);
-
-        if (parts.length > 0) {
-            list[name] = '~~~' + htmlAttrToJsx(list[name], parts) + '~~~';
-        }
-    }
-
-    if (has(list, 'class')) {
-        list['className'] = list['class'];
-        delete list['class'];
-    }
-
-    if (node.children) {
-        for (i = 0; i < node.children.length; i++) {
-            prepareAttrWithBrackets(node.children[i]);
-        }
-    }
-}
-
-function htmlAttrToJsx(attr, list) {
-    var parts = [],
-        start = 0;
-
-    list = list || bracketsParser(attr);
-
-    list.forEach(function (item, i) {
-        if (item.start - start > 0) {
-            parts.push("'" + attr.slice(start, item.start) + "'");
-        }
-        parts.push(attr.slice(item.start + 1, item.end - 1));
-        start = item.end;
-    });
-
-    if (start < attr.length) {
-        parts.push("'" + attr.slice(start) + "'");
-    }
-
-    return "{" + parts.join(' + ') + "}";
-}
-
-function clearAttrWithBrackets(html) {
-    return html
-        .replace(/="~~~\{/g, '={').replace(/}~~~"/g, '}')
-        .replace(spreadAttr, '{...$1}')
-    ;
-}
-
-function removeRegularComments(node) {
-    if (node.type === 'comment' && !renderAnnotation.test(node.data)) {
-        dom.removeNode(node);
-    }
-    else if (node.type === 'tag' && node.children) {
-        for (var i = 0; i < node.children.length; i++) {
-            removeRegularComments(node.children[i]);
-        }
-    }
-}
-
-function slice(code, ops) {
-    return code.slice(ops.start, ops.end);
-}
-
-function replace(code, ranges) {
-    ranges.forEach(function (item, i) {
-        code = insert(code, item.start, item.end, "||" + i + repeat("*", item.end - item.start - 4 - i.toString().length) + "||")
-    });
-
-    return code.replace(/\|\|(\d+)\**\|\|/g, function (x, index) {
-        return ranges[index].str;
-    });
-}
-
-function insert(str, start, end, newStr) {
-    return str.slice(0, start) + newStr + str.slice(end);
-}
-
-function repeat(char, length) {
-    var str = "";
-    for (var i = 0; i < length; i++) {
-        str += char;
-    }
-    return str;
+    return Object.prototype.hasOwnProperty.call(obj, field);
 }
 
 function clone(obj) {
-    return extend(true, {}, obj);
+    return extend(true, Array.isArray(obj) ? [] : {}, obj);
+}
+
+function verbatimLiteral(str) {
+    return {
+        type: 'Literal',
+        value: 0,
+        'x-verbatim-property': {
+            content: str,
+            precedence : gen.Precedence.Primary
+        }
+    }
 }

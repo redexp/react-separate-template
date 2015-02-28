@@ -1,6 +1,4 @@
 var List = React.createClass({
-    displayName: 'List',
-
     getInitialState: function() {
         return {focused: 0};
     },
@@ -30,15 +28,13 @@ var List = React.createClass({
 });
 
 var Item = React.createClass({
-    displayName: 'Item',
     render: function () {
         console.log('test');
         return;
     }
 });
-
-var UsersList = React.createClass({
-    displayName: 'UsersList',
+var Users = {};
+Users.List = React.createClass({
     render: function () {
         return {
             users: function () {
@@ -50,21 +46,21 @@ var UsersList = React.createClass({
     }
 });
 
-var FriendsList = React.createClass({
-    displayName: 'FriendsList',
-    render: function () {
-        return {
-            friends: function () {
-                this.props.friends.map(function (friend) {
-                    return "@jsx-tpl friend";
-                });
-            }
-        };
-    }
-});
+var Friends = {
+    FriendsList: React.createClass({
+        render: function () {
+            return {
+                friends: function () {
+                    this.props.friends.map(function (friend) {
+                        return "@jsx-tpl friend";
+                    });
+                }
+            };
+        }
+    })
+};
 
 var TestList = React.createClass({
-    displayName: 'TestList',
     render: function () {
         var x = "@jsx-tpl test-item";
         return {
@@ -76,17 +72,16 @@ var TestList = React.createClass({
 });
 
 var TestItem = React.createClass({
-    displayName: 'TestItem',
     render: function () {
         return;
     }
 });
 
 var TestWithoutRender = React.createClass({
-    displayName: 'TestWithoutRender'
+
 });
 
-var TestWithoutDisplayName = React.createClass({
+var TestWithoutTemplate = React.createClass({
     render: function () {
         return {
             item: function () {
