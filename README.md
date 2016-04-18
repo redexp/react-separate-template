@@ -101,7 +101,7 @@ var MenuExample = React.createClass({
     }
 });
 ```
-But wait, not that again, HTML in code, maybe we can take out it, but it should be in same template file. Maybe we will
+But wait, not that again, HTML in code, maybe we can take it out, but it should be in same template file. Maybe we will
 make some annotation which will be replaced with HTML (with some unique id) from our template?
 
 ### jsx-tpl
