@@ -14,6 +14,7 @@ React separate template
 5. [Usage from code](#usage-from-code)
 6. [Additional features](#additional-features)
 7. [Gulp plugin](#gulp-plugin)
+8. [Grunt plugin](#grunt-plugin)
 
 First problem of react is HTML inside our JS files and there is no way to make them separate.
 
@@ -254,6 +255,10 @@ All attributes with curly brackets will be converted to react jsx version. If yo
 ## Gulp plugin
  
 See https://github.com/redexp/gulp-react-st
+
+## Grunt plugin
+
+See https://github.com/TheWolfNL/grunt-react-separate-templates
 
 ## Contribute!
 
